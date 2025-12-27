@@ -1,0 +1,23 @@
+[project]
+name = "local-whisper"
+version = "0.1.0"
+description = "Local Whisper CLI tool for audio transcription and text injection"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "faster-whisper",
+    "pynput",
+    "sounddevice",
+    "numpy>=1.22",
+    "scipy",
+    "pyyaml",
+    "torch>=2.5.1",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }

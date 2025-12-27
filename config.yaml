@@ -1,0 +1,6 @@
+# Configuration for local-whisper
+hotkey: "caps_lock"  # Options: caps_lock, f9, f10, etc. (pynput Key names)
+model_size: "turbo"   # Options: tiny, base, small, medium, large, turbo
+device: "cuda"       # Options: cuda, cpu
+language: null       # Set to a language code (e.g., "en", "de") or null for auto-detect
+paste_mode: "type"   # Options: type (simulates typing), clipboard (ctrl+v)
