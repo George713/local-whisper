@@ -38,7 +38,11 @@ Local Whisper is a CLI tool for real-time audio transcription and text injection
 
 ## Running the Application
 
-To start the CLI tool, run:
+### Windows (Recommended)
+On Windows, you can simply double-click the [`run_whisper.bat`](run_whisper.bat) file to start the application.
+
+### Manual Command
+To start the CLI tool manually, run:
 
 ```bash
 uv run cli.py
