@@ -1,9 +1,12 @@
 from faster_whisper import WhisperModel
 import os
 import torch
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Transcriber:
-    def __init__(self, model_size="turbo", device=None):
+    def __init__(self, model_size="turbo", device=None, transcription_config=None):
         # Check if CUDA is available and requested
         if device == "cuda" and not torch.cuda.is_available():
             print("Warning: CUDA requested but not available. Falling back to CPU.")
@@ -37,14 +40,51 @@ class Transcriber:
                 self.model = WhisperModel(model_name, device="cpu", compute_type="int8")
             else:
                 raise e
+        
+        # Store transcription configuration
+        self.transcription_config = transcription_config or {}
+        self.filter_no_speech = self.transcription_config.get("filter_no_speech", True)
+        self.no_speech_threshold = self.transcription_config.get("no_speech_threshold", 0.6)
 
     def transcribe(self, audio_path, language=None):
         if not os.path.exists(audio_path):
+            logger.warning(f"Audio file does not exist: {audio_path}")
             return ""
         
-        print(f"Transcribing {audio_path}...")
+        logger.info(f"Transcribing {audio_path}...")
         # beam_size=1 is much faster for local CPU usage
         segments, info = self.model.transcribe(audio_path, beam_size=1, language=language)
         
-        text = "".join([segment.text for segment in segments])
+        # Convert generator to list to allow multiple iterations
+        segments_list = list(segments)
+        
+        if not segments_list:
+            logger.info("No segments found in audio")
+            return ""
+        
+        # Filter segments based on no_speech_prob if enabled
+        if self.filter_no_speech:
+            filtered_segments = []
+            removed_count = 0
+            
+            for segment in segments_list:
+                if hasattr(segment, 'no_speech_prob') and segment.no_speech_prob >= self.no_speech_threshold:
+                    removed_count += 1
+                    logger.debug(
+                        f"Filtering segment with high no_speech_prob: "
+                        f"{segment.no_speech_prob:.2f} >= {self.no_speech_threshold}"
+                    )
+                    continue
+                filtered_segments.append(segment)
+            
+            if removed_count > 0:
+                logger.info(f"Filtered {removed_count} segments with no_speech_prob >= {self.no_speech_threshold}")
+            
+            segments_list = filtered_segments
+        
+        # Concatenate remaining segments for final text
+        text = "".join([segment.text for segment in segments_list])
+        
+        logger.info(f"Transcription completed: {len(text)} characters from {len(segments_list)} segments")
+        
         return text.strip()

@@ -4,3 +4,17 @@ model_size: "turbo"   # Options: tiny, base, small, medium, large, turbo
 device: "cuda"       # Options: cuda, cpu
 language: null       # Set to a language code (e.g., "en", "de") or null for auto-detect
 paste_mode: "type"   # Options: type (simulates typing), clipboard (ctrl+v)
+
+# Silence filtering configuration
+silence_filter:
+  enabled: true
+  threshold: 0.5                    # VAD threshold (0.0 - 1.0)
+  min_speech_duration_ms: 250       # Minimum speech duration to consider
+  min_silence_duration_ms: 300      # Minimum silence to split segments
+  padding_ms: 100                   # Padding around speech segments
+  min_recording_duration_sec: 0.5   # Minimum recording duration to process
+
+# Transcription filtering configuration
+transcription:
+  filter_no_speech: true            # Filter segments with high no_speech_prob
+  no_speech_threshold: 0.6          # Threshold for filtering (0.0 - 1.0)
